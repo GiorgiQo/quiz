@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ka">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+  <title>ქვიზი პრომო კოდით – შემთხვევითი კითხვებით</title>
+  <style>
+    body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #0b3c5f;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  color: #333;
+}
+h1 {
+  text-align: center;
+  color: #ffd900;
+  font-size: 24px;
+}
+#livesDisplay {
+  text-align: center;
+  font-weight: bold;
+  margin: 20px 0;
+  color: white;
+}
+.question, #introBox {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+.question h3 {
+  margin-bottom: 10px;
+}
+.timer {
+  text-align: right;
+  font-weight: bold;
+  color: #0b3c5f;
+  margin-top: -10px;
+  margin-bottom: 30px;
+}
+label {
+  display: block;
+  margin: 8px 0;
+}
+button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  border: none;
+  background-color: #0b3c5f;
+  color: white;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+button:hover {
+  background-color: #002945;
+  color: #ffffff;
+}
+.reload {
+  border: 1px solid #ffd900;
+}
+.wesebi {
+  line-height: 25px;
+  color: #0b3c5f;
+}
+#result, #promo, #gameover, #blocked {
+  text-align: center;
+  font-weight: bold;
+  font-size: 18px;
+  padding: 20px;
+  border-radius: 10px;
+  display: none;
+}
+#promo { background: #d4f7dc; color: #116611; }
+#gameover { background: #ffe3e3; color: #bb0000; }
+#blocked { background: #fdd; color: #a00; }
+#restart { text-align: center; margin-top: 20px; display: none; }
+
+/* ✅ მობილურისთვის შესაბამისი სტილები */
+@media screen and (max-width: 768px) {
+  body {
+    padding: 20px 10px;
+    font-size: 16px;
+  }
+  h1 {
+    font-size: 20px;
+    line-height: 1.4;
+  }
+  .question, #introBox {
+    padding: 15px;
+  }
+  .question h3 {
+    font-size: 18px;
+  }
+  .timer {
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+  button {
+    width: 100%;
+    font-size: 16px;
+  }
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+  .wesebi-da-logo {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+     display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  .wesebi-da-logo img {
+    width: 60px;
+    height: 60px;
+   
+  }
+  ul {
+    padding-left: 20px;
+  }
+}
+
+  </style>
+</head>
+<body>
+     
+    
+<h1 id="header-text"">მიიღეთ 5% იანი ფასდაკლების პრომო კოდი</h1>
+<div id="introBox">
+    <div class="wesebi-da-logo" style="display: flex; justify-content: space-between;">
+        <h3 style="color:#0b3c5f;">წესები:</h3>
+        <img style="width: 70px; height: 70px;" src="./logo-eng1.png" alt="">
+    </div>
+  
+  
+  <ul>
+   <li class="wesebi"  >ქვიზი შედგება 10 კითხვისაგან</li>
+    <li class="wesebi" >წარმატებით დამთავრების შემთხვევაში მიიღებთ პრომო კოდს.</li>
+    <li class="wesebi" >პრომო კოდით მიიღებთ 5%-იან ფასდაკლებას ონლაინ შეკვეთაზე</li>
+    <li class="wesebi" >პრომო კოდის გამოყენება შეგიძლიათ მხოლოდ ერთხელ</li>
+    <li class="wesebi" >თქვენ გაქვთ მხოლოდ 3 სიცოცხლე.</li>
+    <li class="wesebi" >არასწორი პასუხის შემთხვევაში სიცოცხლე გაკლდებათ.</li>
+    <li class="wesebi" >თუ დაკარგავთ 3 სიცოცხლეს – ქვიზი სრულდება.</li>
+    <li class="wesebi" >ქვიზის თამაში შეგიძლიათ 3 ჯერ ყოველ ერთ დღეში.</li>
+    <li class="wesebi" >ქვიზი აქტიურია 01.06.2025</li>
+  </ul>
+  <!-- <button onclick="document.getElementById('winSound').play()">🔊 ტესტი</button> -->
+  <div style="text-align:center;">
+    <button  onclick="startQuiz()">დაწყება</button>
+  </div>
+</div>
+<div id="livesDisplay" style="display:none;">სიცოცხლე: 💙💙💙</div>
+<div id="quizContainer"></div>
+<div id="promo">🎉 გილოცავთ!  თქვენი პრომო კოდია: <strong>QZ2024</strong></div>
+
+
+<div id="gameover">😢 სამივე სიცოცხლე დაკარგეთ. ქვიზი დასრულდა!</div>
+<div id="blocked">🚫 თქვენ უკვე სცადეთ 3-ჯერ. გთხოვთ, სცადეთ მოგვიანებით.</div>
+<div id="restart">
+  <button class="reload" onclick="location.reload()">🔄 თავიდან სცადე</button>
+</div>
+
+<script>
+const MAX_ATTEMPTS = 3;
+const playedKey = "quiz_attempt_count";
+const playedTimeKey = "quiz_last_played";
+let attempts = parseInt(localStorage.getItem(playedKey)) || 0;
+let lastPlayed = parseInt(localStorage.getItem(playedTimeKey)) || 0;
+let now = Date.now();
+
+if (now - lastPlayed >  1 * 60 * 1000) {
+  attempts = 0;
+  localStorage.setItem(playedKey, 0);
+  localStorage.setItem(playedTimeKey, now);
+}
+
+function startQuiz() {
+  document.getElementById("introBox").style.display = "none";
+  document.getElementById("header-text").style.display ="none"
+  if (attempts >= MAX_ATTEMPTS) {
+    document.getElementById("blocked").style.display = "block";
+  } else {
+    localStorage.setItem(playedKey, attempts + 1);
+    localStorage.setItem(playedTimeKey, now);
+    document.getElementById("livesDisplay").style.display = "block";
+    initQuiz();
+  }
+}
+
+function initQuiz() {
+  const questionPool = [
+    { text: "რომელ პლანეტაზეა ყველაზე მაღალი ტემპერატურა მზის სისტემაში?",  options: ["მარსი", "ვენერა", "იუპიტერი", "მერკური"], correct: 1 },
+    { text: "რა არის გამოსახული სურათზე", image: "./228174_1.jpg ", options: ["ლამინატი", "პარკეტი", "შპალერი", "მოზაიკა"], correct: 0 },
+    { text: "რომელი ფრინველი ვერ ფრინავს, მაგრამ ძალიან სწრაფად დარბის?", options: ["სირაქლემა", "არწივი", "ალბატროსი", "მერცხალი"], correct: 0 },
+    { text: "რომელი ქვეყნის ეროვნული ფერი არ არის წითელი?", options: ["შვეიცარია", "შვედეთი", "კანადა", "ჩინეთი"], correct: 1 },
+    { text: "რომელია ვერცხლის ქიმიური სიმბოლო?", options: ["Au", "Ag", "Fe", "Sn"], correct: 1 },
+    { text: "რა ჰქვია წყლის წერტილების განზავებას ჰაერში?", options: ["ნისლი", "ორთქლი", "ბურუსი", "შხეფი"], correct: 1 },
+    { text: "რომელია ყველაზე გრძელი მდინარე მსოფლიოში?", options: ["ამაზონი", "ნილოსი", "იანგცე", "მისისიპი"], correct: 1 },
+    { text: "რომელი მწარმოებელია iPhone-ის?", options: ["Google", "Microsoft", "Apple", "Samsung"], correct: 2 },
+    { text: "რომელი მეტალი გამოიყენება ყველაზე ხშირად სამკაულის დასამზადებლად?", options: ["ალუმინი", "რკინა", "ვერცხლი", "სპილენძი"], correct: 2 },
+    { text: "რა ეწოდება შხამიან გველს, რომელსაც კაპიუშონი აქვს?", options: ["პითონი", "ანაკონდა", "კობრა", "შავი მამბა"], correct: 2 },
+    { text: "რომელი ინსტრუმენტით იღებენ ფოტოებს?", options: ["ტელესკოპი", "მიკროსკოპი", "კამერა", "პრინტერი"], correct: 2 },
+    { text: "განმეორდება თუ არა ეს კითხვა", options: ["კი", "არა", "იმედია არა", "კარგია"], correct: 3 },
+    { text: "ჩამოთვლილთაგან რომელია პროგრამირების ენა", options: ["HTML", "yava", " Javascript", "kobra"], correct: 2 },
+    { text: "ზვიგენი მიდის მარჯვნივ რამდენი წლისაა მძღოლი", options: ["20", "მარცხნივ", " 60", "გემია"], correct: 2 },
+    { text: "რა ქვია სპილოს შვილს", options: ["სპლიყვი", "ციყვი", " ნიყვი", "კივი"], correct: 0 },
+  ];
+  let shuffledQuestions = questionPool.sort(() => 0.5 - Math.random()).slice(0, 10);
+  let currentQuestion = 0;
+  let lives = 3;
+  let timer;
+
+  function updateLives() {
+    document.getElementById("livesDisplay").innerHTML = `სიცოცხლე: ${"💙".repeat(lives)}${"🤍".repeat(3 - lives)}`;
+  }
+
+  function showQuestion(index) {
+    clearInterval(timer);
+    const container = document.getElementById("quizContainer");
+    container.innerHTML = "";
+
+    if (index >= shuffledQuestions.length) {
+     document.getElementById("promo").style.display = "block";
+   
+
+
+  // ✅ Confetti ეფექტი
+  const duration = 4 * 1000;
+  const animationEnd = Date.now() + duration;
+  const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 1000 };
+
+  const interval = setInterval(function () {
+    const timeLeft = animationEnd - Date.now();
+
+    if (timeLeft <= 0) {
+      return clearInterval(interval);
+    }
+
+    const particleCount = 50 * (timeLeft / duration);
+    confetti({
+      ...defaults,
+      particleCount,
+      origin: { x: Math.random(), y: Math.random() - 0.2 }
+    });
+  }, 250);
+      
+      document.getElementById("restart").style.display = "block";
+      return;
+    }
+
+    let timeLeft = 20;
+    const q = shuffledQuestions[index];
+    const qDiv = document.createElement("div");
+    qDiv.className = "question";
+
+   qDiv.innerHTML = `-
+   <div class='count-question'> <span id='count'>${index + 1}/10</span>
+
+
+  <div class='timer'>დრო: <span id='timer'>20</span>წმ</div>
+  ${q.image ? `<img src='${q.image}' alt='სურათი' style='width:100%; max-height:200px; object-fit:cover; margin-bottom:10px;'>` : ''}
+  <h3>${index + 1}. ${q.text}</h3>
+` + q.options.map((opt, i) =>
+  `<label><input type='radio' name='q${index}' value='${i}'> ${opt}</label>`
+).join('') +
+`<button onclick='submitAnswer(${index})'>შემდეგი</button>`;
+
+
+    container.appendChild(qDiv);
+
+    // timer = setInterval(() => {
+    //   timeLeft--;
+    //   document.getElementById("timer").textContent = timeLeft;
+    //   if (timeLeft <= 0) {
+    //     clearInterval(timer);
+    //     lives--;
+    //     updateLives();
+    //     if (lives <= 0) {
+    //       container.innerHTML = "";
+    //       document.getElementById("gameover").style.display = "block";
+    //       document.getElementById("restart").style.display = "block";
+    //     } else {
+    //       currentQuestion++;
+    //       showQuestion(currentQuestion);
+    //     }
+    //   }
+    // }, 1000);
+  }
+
+  function submitAnswer(index) {
+    clearInterval(timer);
+    const selected = document.querySelector(`input[name='q${index}']:checked`);
+    if (!selected) {
+      alert("აირჩიე პასუხი");
+      return;
+    }
+
+    if (parseInt(selected.value) !== shuffledQuestions[index].correct) {
+      lives--;
+      updateLives();
+      if (lives <= 0) {
+        document.getElementById("quizContainer").innerHTML = "";
+        document.getElementById("gameover").style.display = "block";
+        document.getElementById("restart").style.display = "block";
+        return;
+      }
+    }
+
+    currentQuestion++;
+    showQuestion(currentQuestion);
+  }
+
+  updateLives();
+  showQuestion(currentQuestion);
+
+  window.submitAnswer = submitAnswer;
+  window.showQuestion = showQuestion;
+}
+</script>
+</body>
+</html>
