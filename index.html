@@ -421,12 +421,18 @@ function initQuiz() {
       document.getElementById("correctSound").play();
     } else {
       lives--;
-      document.getElementById('wrongSound').play();
+        const wrongSound = document.getElementById('wrongSound');
+        wrongSound.pause();
+        wrongSound.currentTime = 0;
+        wrongSound.play();
+
       updateLives();
+      
       if (lives <= 0) {
         document.getElementById("quizContainer").innerHTML = "";
         document.getElementById("gameover").style.display = "block";
         document.getElementById("restart").style.display = "block";
+      
         return;
       }
     }
